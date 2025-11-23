@@ -34,48 +34,56 @@ export const DashboardPage = () => {
   }, [latestReading]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-sky-50 px-6 py-10">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#e0f2f1] via-[#b2dfdb] to-[#80cbc4] px-6 py-8 sm:px-10 sm:py-12">
+      <div className="mx-auto flex max-w-7xl flex-col gap-10">
         <PageHeader
           title="Greenhouse dashboard"
           subtitle="Live telemetry from connected sensors"
-          actions={
-            <RequestReadingButton
-  isLoading={isRequesting}
-  onClick={requestFreshReading}
-/>
-          }
         />
         {error && (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+          <div className="rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-sm text-rose-600 backdrop-blur-sm">
             {error}
           </div>
         )}
         {isLoading ? (
-          <div className="flex h-64 items-center justify-center rounded-3xl border border-dashed border-emerald-200 bg-white/60">
-            <div className="flex items-center gap-2 text-emerald-600">
-              <span className="h-2 w-2 animate-ping rounded-full bg-emerald-500" />
+          <div className="flex h-64 items-center justify-center rounded-3xl border border-white/20 bg-white/30 backdrop-blur-md">
+            <div className="flex items-center gap-2 text-emerald-800">
+              <span className="h-2 w-2 animate-ping rounded-full bg-emerald-600" />
               Connecting to greenhouse sensors...
             </div>
           </div>
         ) : (
           <>
-            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {metrics.length > 0 ? (
-                metrics.map(({ metric, value, status }) => (
-                  <MetricCard 
-                    key={metric?.id || 'unknown'}
-                    metric={metric} 
-                    value={value} 
-                    status={status} 
-                  />
-                ))
+                <>
+                  {metrics.map(({ metric, value, status }) => (
+                    <MetricCard 
+                      key={metric?.id || 'unknown'}
+                      metric={metric} 
+                      value={value} 
+                      status={status} 
+                    />
+                  ))}
+                  <div className="flex items-center justify-center">
+                    <RequestReadingButton
+                      isLoading={isRequesting}
+                      onClick={requestFreshReading}
+                    />
+                  </div>
+                </>
               ) : (
-                <div className="col-span-full rounded-2xl border border-dashed border-emerald-200 bg-white/60 p-6 text-center text-emerald-600">
+                <div className="col-span-full rounded-3xl border border-white/20 bg-white/30 p-8 text-center text-emerald-800 backdrop-blur-md">
                   <p>No sensor data available</p>
-                  <p className="mt-2 text-sm text-emerald-500">
+                  <p className="mt-2 text-sm text-emerald-700">
                     Click "Request Data" to fetch the latest readings
                   </p>
+                  <div className="mt-4 flex justify-center">
+                    <RequestReadingButton
+                      isLoading={isRequesting}
+                      onClick={requestFreshReading}
+                    />
+                  </div>
                 </div>
               )}
             </section>

@@ -8,6 +8,7 @@ export interface SensorMetricDefinition {
   unit: string;
   direction: ThresholdDirection;
   badge: string;
+  iconPath?: string;
   formatter?: (value: number) => string;
   getStatus: (value: number) => SensorStatus;
 }

@@ -12,9 +12,9 @@ export const TrendChart = ({ readings }: TrendChartProps) => {
 
   if (limited.length === 0) {
     return (
-      <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <p className="text-sm text-zinc-500">Temperature trend</p>
-        <div className="mt-6 flex h-32 items-center justify-center rounded-2xl bg-zinc-50 text-sm text-zinc-500">
+      <div className="rounded-[2rem] bg-white/40 p-8 shadow-lg backdrop-blur-xl border border-white/50">
+        <p className="text-sm font-medium text-zinc-500">Temperature trend</p>
+        <div className="mt-6 flex h-32 items-center justify-center rounded-2xl bg-white/30 text-sm text-zinc-500">
           No readings yet.
         </div>
       </div>
@@ -33,35 +33,37 @@ export const TrendChart = ({ readings }: TrendChartProps) => {
   const maxValue = Math.max(...temperatures, 1);
 
   return (
-    <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <div className="rounded-[2rem] bg-white/60 p-8 shadow-lg backdrop-blur-xl border border-white/40">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-zinc-500">Temperature trend</p>
-          <p className="text-2xl font-semibold text-zinc-900">
+          <p className="text-sm font-medium text-zinc-500">Temperature trend</p>
+          <p className="text-3xl font-bold text-zinc-900">
             {last && typeof last.temperature === "number" && !Number.isNaN(last.temperature)
               ? `${last.temperature.toFixed(1)} degC`
               : "—"}
           </p>
         </div>
 
-        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900">
+        <span className="rounded-full bg-emerald-100/80 px-3 py-1 text-xs font-bold text-emerald-800 backdrop-blur-sm">
           24h
         </span>
       </div>
 
-      <div className="mt-4 h-40 w-full">
+      <div className="mt-6 h-48 w-full">
         <svg viewBox="0 0 100 40" className="h-full w-full">
           <defs>
             <linearGradient id="tempGradient" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#34d399" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#34d399" stopOpacity="0.05" />
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
             </linearGradient>
           </defs>
 
           <polyline
             fill="none"
             stroke="#10b981"
-            strokeWidth="2"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             points={limited
               .map((reading, index) => {
                 const temp =
@@ -98,7 +100,7 @@ export const TrendChart = ({ readings }: TrendChartProps) => {
         </svg>
       </div>
 
-      <div className="mt-4 grid grid-cols-4 gap-2 text-xs text-zinc-500">
+      <div className="mt-4 grid grid-cols-4 gap-2 text-xs font-medium text-zinc-400">
         {limited.map((reading, idx) => (
           <span key={reading.id ?? idx}>{formatTimestamp(reading.timestamp)}</span>
         ))}

@@ -30,35 +30,44 @@ interface MetricCardProps {
   status: SensorStatus;
 }
 
+import Image from "next/image";
+
+// ... imports
+
 export const MetricCard = ({ metric, value, status }: MetricCardProps) => {
   const style = STATUS_STYLES[status];
+  
   return (
-    <article
-      className={`flex flex-col gap-3 rounded-2xl border p-4 shadow-sm transition hover:shadow ${style.bg}`}
-    >
-      <div className="flex items-center justify-between text-sm text-zinc-500">
-        <span className="flex items-center gap-2 font-medium text-zinc-900">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900/5 text-xs font-semibold text-zinc-700">
-            {metric.badge}
-          </span>
-          {metric.label}
-        </span>
-        <span
-          className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${style.text}`}
-        >
-          <span className={`h-2 w-2 rounded-full ${style.indicator}`} />
-          {status}
-        </span>
+    <article className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] bg-white/60 p-6 shadow-lg backdrop-blur-xl transition-all hover:bg-white/70 hover:shadow-xl border border-white/40">
+      <div className="flex items-center justify-between">
+        <div className="flex h-12 w-12 items-center justify-center overflow-hidden">
+          {metric.iconPath ? (
+            <Image 
+              src={metric.iconPath} 
+              alt={metric.label} 
+              width={48} 
+              height={48} 
+              className="object-contain drop-shadow-sm"
+            />
+          ) : (
+            <span className="text-xs font-bold text-zinc-700">{metric.badge}</span>
+          )}
+        </div>
+        <div className={`h-3 w-3 rounded-full shadow-sm ${style.indicator}`} />
       </div>
-      <p className="text-4xl font-semibold text-zinc-900">
-        {value === undefined || value === null || Number.isNaN(value) ? (
-          <span className="text-lg font-semibold text-zinc-500">Disconnected</span>
-        ) : metric.formatter ? (
-          metric.formatter(value)
-        ) : (
-          `${value.toFixed(1)}${metric.unit}`
-        )}
-      </p>
+
+      <div className="mt-6">
+        <h3 className="text-sm font-medium text-zinc-600">{metric.label}</h3>
+        <p className="mt-1 text-3xl font-bold tracking-tight text-zinc-900">
+          {value === undefined || value === null || Number.isNaN(value) ? (
+            <span className="text-xl text-zinc-400">--</span>
+          ) : metric.formatter ? (
+            metric.formatter(value)
+          ) : (
+            `${value.toFixed(1)}${metric.unit}`
+          )}
+        </p>
+      </div>
     </article>
   );
 };

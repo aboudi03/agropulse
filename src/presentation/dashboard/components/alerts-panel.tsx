@@ -14,23 +14,23 @@ export const AlertsPanel = ({ readings }: AlertsPanelProps) => {
   .slice(0, 4)
 
   return (
-    <div className="rounded-3xl border border-rose-100 bg-rose-50 p-6 shadow-sm">
-      <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-sm font-semibold text-rose-600">
+    <div className="rounded-[2rem] bg-white/60 p-8 shadow-lg backdrop-blur-xl border border-white/40">
+      <div className="flex items-center gap-4">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-lg font-bold text-rose-600 shadow-sm">
           !
         </span>
 
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-rose-600">
+          <p className="text-sm font-bold uppercase tracking-wide text-rose-600">
             Urgent alerts
           </p>
-          <p className="text-zinc-900">{urgent.length} active</p>
+          <p className="text-zinc-700 font-medium">{urgent.length} active</p>
         </div>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-6 space-y-3">
         {urgent.length === 0 ? (
-          <p className="text-sm text-zinc-600">No urgent alerts right now.</p>
+          <p className="text-sm text-zinc-500">No urgent alerts right now.</p>
         ) : (
           urgent.map((reading, idx) => {
             const soil =
@@ -48,19 +48,19 @@ export const AlertsPanel = ({ readings }: AlertsPanelProps) => {
             return (
               <div
                 key={reading.id ?? idx}
-                className="flex items-center justify-between rounded-2xl border border-rose-100 bg-white/60 px-4 py-3"
+                className="flex items-center justify-between rounded-2xl border border-white/40 bg-white/40 px-5 py-4 shadow-sm backdrop-blur-sm transition hover:bg-white/60"
               >
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900">
+                  <p className="text-sm font-bold text-zinc-900">
                     Critical reading at {formatTimestamp(reading.timestamp)}
                   </p>
 
-                  <p className="text-xs text-rose-500">
+                  <p className="text-xs font-medium text-rose-600 mt-1">
                     Soil {soil} · Humidity {hum} · Temp {temp}
                   </p>
                 </div>
 
-                <span className="rounded-full bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-600">
+                <span className="rounded-full bg-rose-500/10 px-3 py-1 text-xs font-bold text-rose-600">
                   urgent
                 </span>
               </div>

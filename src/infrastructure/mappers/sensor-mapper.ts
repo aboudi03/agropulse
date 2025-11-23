@@ -7,7 +7,7 @@ export function toSensorReading(dto: SensorReadingDto): SensorReading {
     soil: dto.soil ?? null,
     humidity: dto.humidity ?? null,
     temperature: dto.temperature ?? null,
-    urgent: dto.urgent ?? false,
+    urgent: (dto.temperature != null && dto.temperature < -100) || (dto.urgent ?? false),
     timestamp: dto.timestamp,
   };
 }

@@ -9,6 +9,7 @@ export const SENSOR_METRICS: SensorMetricDefinition[] = [
     unit: "%",
     direction: "low",
     badge: "SM",
+    iconPath: "/icons/soil.svg",
     formatter: (value) => `${value}%`,
     getStatus: (value) =>
       evaluateDirectionalStatus(value, DEFAULT_SENSOR_THRESHOLDS.soil, "low"),
@@ -19,6 +20,7 @@ export const SENSOR_METRICS: SensorMetricDefinition[] = [
     unit: "%",
     direction: "low",
     badge: "AH",
+    iconPath: "/icons/humidity.svg",
     formatter: (value) => `${value}%`,
     getStatus: (value) =>
       evaluateDirectionalStatus(value, DEFAULT_SENSOR_THRESHOLDS.humidity, "low"),
@@ -29,9 +31,12 @@ export const SENSOR_METRICS: SensorMetricDefinition[] = [
     unit: "degC",
     direction: "high",
     badge: "TMP",
+    iconPath: "/icons/temperature.svg",
     formatter: (value) => `${value.toFixed(1)} degC`,
-    getStatus: (value) =>
-      evaluateDirectionalStatus(value, DEFAULT_SENSOR_THRESHOLDS.temperature, "high"),
+    getStatus: (value) => {
+      if (value < -100) return "critical";
+      return evaluateDirectionalStatus(value, DEFAULT_SENSOR_THRESHOLDS.temperature, "high");
+    },
   },
 ];
 
