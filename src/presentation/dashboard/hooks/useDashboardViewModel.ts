@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Device } from "../../../domain/models/device";
 import { SensorService } from "../../../application/services/sensor-service";
 import { HttpSensorRepository } from "../../../infrastructure/repositories/http-sensor-repository";
 import { DashboardViewModel, type DashboardState } from "../view-models/dashboard-view-model";
@@ -17,7 +18,11 @@ export const useDashboardViewModel = () => {
     const repository = new HttpSensorRepository();
 
     const service = new SensorService(repository);
-    return new DashboardViewModel(service);
+    
+    // Get deviceId from environment variable or use default
+    const deviceId = process.env.NEXT_PUBLIC_DEVICE_ID || "GREENHOUSE_001";
+    
+    return new DashboardViewModel(service, deviceId);
   }, []);
 
   const [state, setState] = useState<DashboardState>({
@@ -27,6 +32,11 @@ export const useDashboardViewModel = () => {
     isRequesting: false,
     error: undefined,
   });
+
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>(
+    viewModel.getDeviceId()
+  );
 
   const load = useCallback(async () => {
     try {
@@ -38,6 +48,23 @@ export const useDashboardViewModel = () => {
         isLoading: false,
         error: error instanceof Error ? error.message : "Failed to load data",
       }));
+    }
+  }, [viewModel]);
+
+  const loadDevices = useCallback(async () => {
+    try {
+      const deviceList = await viewModel.loadDevices();
+      setDevices(deviceList);
+    } catch (error) {
+      // Gracefully handle missing /api/devices endpoint
+      if (error instanceof Error && error.message.includes('404')) {
+        console.warn('⚠️ /api/devices endpoint not found. Device selector will be hidden.');
+        console.warn('To enable device switching, implement GET /api/devices on your backend.');
+        setDevices([]);
+      } else {
+        console.error("Failed to load devices:", error);
+        setDevices([]);
+      }
     }
   }, [viewModel]);
 
@@ -66,13 +93,10 @@ export const useDashboardViewModel = () => {
   }, [viewModel]);
 
   const handleRequestFreshReading = useCallback(
-    async (controllerFromCaller?: string) => {
+    async () => {
       setState((prev) => ({ ...prev, isRequesting: true }));
       try {
-        const controller =
-          controllerFromCaller ?? process.env.NEXT_PUBLIC_CONTROLLER_ID;
-
-        await viewModel.requestFreshReading(controller);
+        await viewModel.requestFreshReading();
 
         await Promise.all([refreshLatest(), refreshHistory()]);
       } finally {
@@ -82,9 +106,20 @@ export const useDashboardViewModel = () => {
     [refreshHistory, refreshLatest, viewModel]
   );
 
+  const handleDeviceChange = useCallback(
+    async (deviceId: string) => {
+      setSelectedDeviceId(deviceId);
+      viewModel.setDeviceId(deviceId);
+      setState((prev) => ({ ...prev, isLoading: true }));
+      await load();
+    },
+    [load, viewModel]
+  );
+
   useEffect(() => {
     load();
-  }, [load]);
+    loadDevices();
+  }, [load, loadDevices]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -96,8 +131,12 @@ export const useDashboardViewModel = () => {
 
   return {
     state,
+    devices,
+    selectedDeviceId,
     refreshLatest,
     refreshHistory,
     requestFreshReading: handleRequestFreshReading,
+    onDeviceChange: handleDeviceChange,
   };
 };
+

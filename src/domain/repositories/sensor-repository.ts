@@ -1,8 +1,10 @@
 import type { SensorReading } from "../models/sensor-reading";
+import type { Device } from "../models/device";
 
 export interface SensorRepository {
-  getLatestReading(): Promise<SensorReading>;
-  getReadingHistory(): Promise<SensorReading[]>;
-  requestFreshReading(controller?: string): Promise<void>;
+  getDevices(): Promise<Device[]>;
+  getLatestReading(deviceId: string): Promise<SensorReading>;
+  getReadingHistory(deviceId: string): Promise<SensorReading[]>;
+  requestFreshReading(deviceId: string): Promise<void>;
 }
 

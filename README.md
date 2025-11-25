@@ -20,6 +20,21 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Environment Configuration
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# API Configuration
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+
+# Device Configuration
+NEXT_PUBLIC_DEVICE_ID=GREENHOUSE_001
+```
+
+- `NEXT_PUBLIC_API_BASE_URL`: The base URL of your AgroPulse backend API
+- `NEXT_PUBLIC_DEVICE_ID`: The device ID to monitor (default: GREENHOUSE_001)
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

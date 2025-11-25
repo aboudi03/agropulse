@@ -4,6 +4,7 @@ import type { SensorReading } from "@/src/domain/models/sensor-reading";
 export function toSensorReading(dto: SensorReadingDto): SensorReading {
   return {
     id: dto.id,
+    deviceId: dto.deviceId,
     soil: dto.soil ?? null,
     humidity: dto.humidity ?? null,
     temperature: dto.temperature ?? null,

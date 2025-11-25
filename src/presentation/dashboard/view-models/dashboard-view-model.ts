@@ -1,4 +1,5 @@
 import type { SensorReading } from "../../../domain/models/sensor-reading";
+import type { Device } from "../../../domain/models/device";
 import { SensorService } from "../../../application/services/sensor-service";
 
 export interface DashboardState {
@@ -10,12 +11,31 @@ export interface DashboardState {
 }
 
 export class DashboardViewModel {
-  constructor(private readonly sensorService: SensorService) {}
+  private deviceId: string;
+
+  constructor(
+    private readonly sensorService: SensorService,
+    initialDeviceId: string
+  ) {
+    this.deviceId = initialDeviceId;
+  }
+
+  async loadDevices(): Promise<Device[]> {
+    return this.sensorService.getDevices();
+  }
+
+  setDeviceId(deviceId: string): void {
+    this.deviceId = deviceId;
+  }
+
+  getDeviceId(): string {
+    return this.deviceId;
+  }
 
   async loadInitialState(): Promise<DashboardState> {
     const [latestReading, history] = await Promise.all([
-      this.sensorService.getLatestReading(),
-      this.sensorService.getReadingHistory(),
+      this.sensorService.getLatestReading(this.deviceId),
+      this.sensorService.getReadingHistory(this.deviceId),
     ]);
 
     return {
@@ -27,15 +47,15 @@ export class DashboardViewModel {
   }
 
   async refreshReading(): Promise<SensorReading> {
-    return this.sensorService.getLatestReading();
+    return this.sensorService.getLatestReading(this.deviceId);
   }
 
-  async requestFreshReading(controller?: string): Promise<void> {
-    return this.sensorService.requestFreshReading(controller);
+  async requestFreshReading(): Promise<void> {
+    return this.sensorService.requestFreshReading(this.deviceId);
   }
 
   async reloadHistory(): Promise<SensorReading[]> {
-    return this.sensorService.getReadingHistory();
+    return this.sensorService.getReadingHistory(this.deviceId);
   }
 }
 

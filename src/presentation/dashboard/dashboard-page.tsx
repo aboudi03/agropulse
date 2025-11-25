@@ -9,9 +9,10 @@ import { TrendChart } from "./components/trend-chart";
 import { HistoryTable } from "./components/history-table";
 import { AlertsPanel } from "./components/alerts-panel";
 import { RequestReadingButton } from "./components/request-reading-button";
+import { DeviceSelector } from "./components/device-selector";
 
 export const DashboardPage = () => {
-  const { state, requestFreshReading } = useDashboardViewModel();
+  const { state, devices, selectedDeviceId, onDeviceChange, requestFreshReading } = useDashboardViewModel();
   const { latestReading, history, isLoading, isRequesting, error } = state;
 
   const metrics = useMemo(() => {
@@ -22,6 +23,11 @@ export const DashboardPage = () => {
     return SENSOR_METRICS
       .filter(metric => metric != null)  // Filter out any null/undefined metrics
       .map((metric) => {
+        // Additional safety check
+        if (!metric || !metric.id) {
+          return null;
+        }
+        
         const raw = latestReading[metric.id];
         const value = raw == null ? null : raw;
         const status = typeof value === "number" ? metric.getStatus(value) : "warning";
@@ -30,7 +36,8 @@ export const DashboardPage = () => {
           value,
           status,
         };
-      });
+      })
+      .filter(item => item !== null);  // Remove any null items
   }, [latestReading]);
 
   return (
@@ -38,7 +45,15 @@ export const DashboardPage = () => {
       <div className="mx-auto flex max-w-7xl flex-col gap-10">
         <PageHeader
           title="Greenhouse dashboard"
-          subtitle="Live telemetry from connected sensors"
+          subtitle={`Live telemetry from ${latestReading?.deviceId || 'connected sensors'}`}
+          actions={
+            <DeviceSelector
+              devices={devices}
+              selectedDeviceId={selectedDeviceId}
+              onDeviceChange={onDeviceChange}
+              isDisabled={isLoading}
+            />
+          }
         />
         {error && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3 text-sm text-rose-600 backdrop-blur-sm">
