@@ -17,22 +17,38 @@ export class HttpSensorRepository implements SensorRepository {
     return dtos.map(toDevice);
   }
 
-  async getLatestReading(deviceId: string): Promise<SensorReading> {
-    const dto = await httpClient<SensorReadingDto>({
-      path: `/api/sensor/${deviceId}/latest`,
-      cache: "no-store",
-    });
+  async getLatestReading(deviceId: string): Promise<SensorReading | null> {
+    try {
+      const dto = await httpClient<SensorReadingDto>({
+        path: `/api/sensor/${deviceId}/latest`,
+        cache: "no-store",
+      });
 
-    return toSensorReading(dto);
+      return toSensorReading(dto);
+    } catch (error) {
+      // Handle 404 - device exists but has no readings yet
+      if (error instanceof Error && error.message.includes('404')) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async getReadingHistory(deviceId: string): Promise<SensorReading[]> {
-    const dtos = await httpClient<SensorReadingDto[]>({
-      path: `/api/sensor/${deviceId}/all`,
-      cache: "no-store",
-    });
+    try {
+      const dtos = await httpClient<SensorReadingDto[]>({
+        path: `/api/sensor/${deviceId}/all`,
+        cache: "no-store",
+      });
 
-    return dtos.map(toSensorReading);
+      return dtos.map(toSensorReading);
+    } catch (error) {
+      // Handle 404 - device exists but has no readings yet
+      if (error instanceof Error && error.message.includes('404')) {
+        return [];
+      }
+      throw error;
+    }
   }
 
   async requestFreshReading(deviceId: string): Promise<void> {

@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Real-time greenhouse monitoring dashboard",
 };
 
+import { AuthProvider } from "../presentation/auth/auth-context";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

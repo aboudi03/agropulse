@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AgroPulse API Debugger</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .header p {
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 2rem;
+      }
+
+      .section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f9fafb;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+      }
+
+      .section h2 {
+        color: #1f2937;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+      }
+
+      .input-group {
+        margin-bottom: 1rem;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #4b5563;
+        font-weight: 500;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #10b981;
+      }
+
+      button {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .response {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #1f2937;
+        color: #10b981;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 0.875rem;
+        max-height: 400px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      .error {
+        color: #ef4444;
+      }
+
+      .success {
+        color: #10b981;
+      }
+
+      .warning {
+        color: #f59e0b;
+      }
+
+      .info {
+        background: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+        color: #1e40af;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔍 AgroPulse API Debugger</h1>
+        <p>Inspect backend API responses for your user</p>
+      </div>
+
+      <div class="content">
+        <div class="info">
+          <strong>Instructions:</strong> First login with your credentials, then
+          test the API endpoints to see what data the backend is returning.
+        </div>
+
+        <!-- Login Section -->
+        <div class="section">
+          <h2>1. Login</h2>
+          <div class="input-group">
+            <label>Username</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="Enter your username"
+            />
+          </div>
+          <div class="input-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Enter your password"
+            />
+          </div>
+          <button onclick="login()">Login</button>
+          <div id="loginResponse" class="response" style="display: none"></div>
+        </div>
+
+        <!-- API Endpoints Section -->
+        <div class="section">
+          <h2>2. Test API Endpoints</h2>
+          <button onclick="testEndpoint('/api/device')">
+            GET /api/device (Get Devices)
+          </button>
+          <button onclick="testEndpoint('/api/sensor/GREENHOUSE_001/latest')">
+            GET /api/sensor/GREENHOUSE_001/latest
+          </button>
+          <button onclick="testEndpoint('/api/sensor/GREENHOUSE_001/all')">
+            GET /api/sensor/GREENHOUSE_001/all
+          </button>
+          <button onclick="testEndpoint('/api/admin/devices')">
+            GET /api/admin/devices (Admin)
+          </button>
+          <button onclick="testEndpoint('/api/admin/users')">
+            GET /api/admin/users (Admin)
+          </button>
+          <div id="apiResponse" class="response" style="display: none"></div>
+        </div>
+
+        <!-- Custom Endpoint Section -->
+        <div class="section">
+          <h2>3. Custom Endpoint</h2>
+          <div class="input-group">
+            <label>Endpoint Path</label>
+            <input
+              type="text"
+              id="customEndpoint"
+              placeholder="/api/your/endpoint"
+            />
+          </div>
+          <button onclick="testCustomEndpoint()">Test Custom Endpoint</button>
+          <div id="customResponse" class="response" style="display: none"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE_URL = "http://localhost:8080";
+      let authToken = localStorage.getItem("auth_token");
+
+      async function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const responseDiv = document.getElementById("loginResponse");
+
+        responseDiv.style.display = "block";
+        responseDiv.innerHTML = "Logging in...";
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            authToken = data.token;
+            localStorage.setItem("auth_token", authToken);
+            responseDiv.innerHTML = `<span class="success">✅ Login successful!</span>\n\n${JSON.stringify(
+              data,
+              null,
+              2
+            )}`;
+          } else {
+            responseDiv.innerHTML = `<span class="error">❌ Login failed (${
+              response.status
+            })</span>\n\n${JSON.stringify(data, null, 2)}`;
+          }
+        } catch (error) {
+          responseDiv.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+        }
+      }
+
+      async function testEndpoint(endpoint) {
+        const responseDiv = document.getElementById("apiResponse");
+        responseDiv.style.display = "block";
+        responseDiv.innerHTML = `Testing ${endpoint}...`;
+
+        if (!authToken) {
+          responseDiv.innerHTML =
+            '<span class="warning">⚠️ Please login first!</span>';
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          const text = await response.text();
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch {
+            data = text;
+          }
+
+          if (response.ok) {
+            responseDiv.innerHTML = `<span class="success">✅ ${endpoint} (${
+              response.status
+            })</span>\n\n${JSON.stringify(data, null, 2)}`;
+          } else {
+            responseDiv.innerHTML = `<span class="error">❌ ${endpoint} (${
+              response.status
+            })</span>\n\n${
+              typeof data === "string" ? data : JSON.stringify(data, null, 2)
+            }`;
+          }
+        } catch (error) {
+          responseDiv.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+        }
+      }
+
+      async function testCustomEndpoint() {
+        const endpoint = document.getElementById("customEndpoint").value;
+        const responseDiv = document.getElementById("customResponse");
+        responseDiv.style.display = "block";
+        responseDiv.innerHTML = `Testing ${endpoint}...`;
+
+        if (!authToken) {
+          responseDiv.innerHTML =
+            '<span class="warning">⚠️ Please login first!</span>';
+          return;
+        }
+
+        if (!endpoint) {
+          responseDiv.innerHTML =
+            '<span class="warning">⚠️ Please enter an endpoint!</span>';
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          const text = await response.text();
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch {
+            data = text;
+          }
+
+          if (response.ok) {
+            responseDiv.innerHTML = `<span class="success">✅ ${endpoint} (${
+              response.status
+            })</span>\n\n${JSON.stringify(data, null, 2)}`;
+          } else {
+            responseDiv.innerHTML = `<span class="error">❌ ${endpoint} (${
+              response.status
+            })</span>\n\n${
+              typeof data === "string" ? data : JSON.stringify(data, null, 2)
+            }`;
+          }
+        } catch (error) {
+          responseDiv.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+        }
+      }
+
+      // Check if already logged in
+      if (authToken) {
+        document.getElementById("loginResponse").style.display = "block";
+        document.getElementById("loginResponse").innerHTML =
+          '<span class="success">✅ Already logged in (token found in localStorage)</span>';
+      }
+    </script>
+  </body>
+</html>

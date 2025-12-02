@@ -24,7 +24,7 @@ export class SensorService {
   }
 
 
-  getLatestReading(deviceId: string): Promise<SensorReading> {
+  getLatestReading(deviceId: string): Promise<SensorReading | null> {
     return this.getLatestReadingUseCase.execute(deviceId);
   }
 

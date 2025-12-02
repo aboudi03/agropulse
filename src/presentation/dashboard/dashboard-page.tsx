@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useDashboardViewModel } from "./hooks/useDashboardViewModel";
+import { useAuth } from "../auth/auth-context";
 import { PageHeader } from "../components/page-header";
 import { SENSOR_METRICS } from "../../shared/constants/sensor-metrics";
 import { MetricCard } from "./components/metric-card";
@@ -12,6 +13,7 @@ import { RequestReadingButton } from "./components/request-reading-button";
 import { DeviceSelector } from "./components/device-selector";
 
 export const DashboardPage = () => {
+  const { logout } = useAuth();
   const { state, devices, selectedDeviceId, onDeviceChange, requestFreshReading } = useDashboardViewModel();
   const { latestReading, history, isLoading, isRequesting, error } = state;
 
@@ -47,12 +49,20 @@ export const DashboardPage = () => {
           title="Greenhouse dashboard"
           subtitle={`Live telemetry from ${latestReading?.deviceId || 'connected sensors'}`}
           actions={
-            <DeviceSelector
-              devices={devices}
-              selectedDeviceId={selectedDeviceId}
-              onDeviceChange={onDeviceChange}
-              isDisabled={isLoading}
-            />
+            <div className="flex items-center gap-3">
+              <DeviceSelector
+                devices={devices}
+                selectedDeviceId={selectedDeviceId}
+                onDeviceChange={onDeviceChange}
+                isDisabled={isLoading}
+              />
+              <button
+                onClick={logout}
+                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+              >
+                Sign Out
+              </button>
+            </div>
           }
         />
         {error && (
@@ -89,9 +99,16 @@ export const DashboardPage = () => {
                 </>
               ) : (
                 <div className="col-span-full rounded-3xl border border-white/20 bg-white/30 p-8 text-center text-emerald-800 backdrop-blur-md">
-                  <p>No sensor data available</p>
+                  <p className="font-medium">No sensor data available yet</p>
                   <p className="mt-2 text-sm text-emerald-700">
-                    Click "Request Data" to fetch the latest readings
+                    {selectedDeviceId ? (
+                      <>Device <span className="font-mono font-semibold">{selectedDeviceId}</span> is assigned but hasn't sent any readings yet.</>
+                    ) : (
+                      "Waiting for sensor data..."
+                    )}
+                  </p>
+                  <p className="mt-1 text-sm text-emerald-600">
+                    Make sure your ESP32 device is connected and sending data, or click "Request Data" to trigger a reading.
                   </p>
                   <div className="mt-4 flex justify-center">
                     <RequestReadingButton

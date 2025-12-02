@@ -46,7 +46,7 @@ export class DashboardViewModel {
     };
   }
 
-  async refreshReading(): Promise<SensorReading> {
+  async refreshReading(): Promise<SensorReading | null> {
     return this.sensorService.getLatestReading(this.deviceId);
   }
 
