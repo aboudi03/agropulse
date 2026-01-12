@@ -134,6 +134,9 @@ export const useDashboardViewModel = () => {
       try {
         await viewModel.requestFreshReading();
 
+        // Wait for ESP32 to poll (up to 5s) and upload data
+        await new Promise(resolve => setTimeout(resolve, 6000));
+
         await Promise.all([refreshLatest(), refreshHistory()]);
       } catch (error) {
         setState((prev) => ({
