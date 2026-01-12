@@ -1,4 +1,4 @@
-import type { SensorStatus } from "../../domain/models/sensor-reading";
+import type { SensorStatus } from "../types/sensor-status";
 import type { SensorThreshold } from "../../domain/value-objects/thresholds";
 import type { ThresholdDirection } from "../types/sensor-metric";
 
