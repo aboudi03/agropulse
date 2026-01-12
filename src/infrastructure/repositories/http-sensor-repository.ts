@@ -54,7 +54,7 @@ export class HttpSensorRepository implements SensorRepository {
   async requestFreshReading(deviceId: string): Promise<void> {
     // Hit backend trigger endpoint
     await httpClient({
-      path: `/api/sensor/trigger/${deviceId}`,
+      path: `/api/device/${deviceId}/trigger`,
       method: "POST",
     });
   }
