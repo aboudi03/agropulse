@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+*.lcov
 
 # next.js
 /.next/
@@ -19,10 +20,14 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
 *.pem
+*.swp
+*.swo
+*~
 
 # debug
 npm-debug.log*
@@ -31,7 +36,13 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+.env.example
 
 # vercel
 .vercel
@@ -45,8 +56,48 @@ next-env.d.ts
 .idea/
 *.swp
 *.swo
+*.iws
+*.iml
+*.ipr
+.idea_modules/
 
 # OS
 Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.bak
+
+# Cache
+.cache/
+.eslintcache
+.eslintignore
+
+# Package lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Credentials/Security
+.npmrc
+.yarnrc
+credentials.json
+secrets.json
+
+# Runtime
+*.pid
+*.seed
+*.pid.lock
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+desktop.ini
 ehthumbs.db
 Desktop.ini
