@@ -41,6 +41,14 @@ export class HttpAdminRepository implements AdminRepository {
     });
   }
 
+  async updateUser(userId: number, data: Partial<{ email: string; farmId: number; role: string }>): Promise<UserDto> {
+    return httpClient<UserDto>({
+      path: `/api/admin/users/${userId}`,
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
   async getDevices(): Promise<AdminDeviceDto[]> {
     return httpClient<AdminDeviceDto[]>({
       path: "/api/admin/devices",

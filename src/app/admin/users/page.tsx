@@ -3,13 +3,17 @@
 import { useState, useEffect } from "react";
 import { AdminService } from "../../../application/services/admin-service";
 import { HttpAdminRepository } from "../../../infrastructure/repositories/http-admin-repository";
-import type { UserDto } from "../../../application/dtos/admin-dtos";
+import type { UserDto, FarmDto } from "../../../application/dtos/admin-dtos";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserDto[]>([]);
+  const [farms, setFarms] = useState<FarmDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [editFarmId, setEditFarmId] = useState<number | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -33,8 +37,22 @@ export default function UsersPage() {
     }
   };
 
+  const loadFarms = async () => {
+    try {
+      const data = await adminService.getFarms();
+      setFarms(data);
+      // Set first farm as default
+      if (data.length > 0) {
+        setFormData(prev => ({ ...prev, farmId: data[0].id }));
+      }
+    } catch (error) {
+      console.error("Failed to load farms", error);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
+    loadFarms();
   }, []);
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -66,6 +84,32 @@ export default function UsersPage() {
       alert("Failed to delete user. Please try again.");
     } finally {
       setDeletingUserId(null);
+    }
+  };
+
+  const handleEditFarm = (user: UserDto) => {
+    setEditingUserId(user.id);
+    setEditFarmId(user.farmId);
+  };
+
+  const handleUpdateFarm = async () => {
+    if (editingUserId === null || editFarmId === null) return;
+
+    setIsUpdating(true);
+    try {
+      await adminService.updateUser(editingUserId, {
+        farmId: editFarmId,
+        role: users.find(u => u.id === editingUserId)?.role || "USER",
+        email: users.find(u => u.id === editingUserId)?.email || "",
+      });
+      loadUsers(); // Reload list
+      setEditingUserId(null);
+      setEditFarmId(null);
+    } catch (error) {
+      console.error("Failed to update user farm", error);
+      alert("Failed to update user farm. Please try again.");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -101,14 +145,19 @@ export default function UsersPage() {
             className="rounded-lg border border-slate-200 px-4 py-2 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             required
           />
-          <input
-            type="number"
+          <select
             value={formData.farmId}
             onChange={(e) => setFormData({ ...formData, farmId: parseInt(e.target.value) })}
-            placeholder="Farm ID"
-            className="rounded-lg border border-slate-200 px-4 py-2 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            className="rounded-lg border border-slate-200 px-4 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             required
-          />
+          >
+            <option value="" disabled>Select Farm</option>
+            {farms.map((farm) => (
+              <option key={farm.id} value={farm.id}>
+                {farm.name}
+              </option>
+            ))}
+          </select>
           <select
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value as "USER" | "ADMIN" })}
@@ -139,7 +188,7 @@ export default function UsersPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Username</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Farm ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Farm</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Actions</th>
               </tr>
             </thead>
@@ -165,15 +214,25 @@ export default function UsersPage() {
                         {user.role}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-500">{user.farmId}</td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
+                      {farms.find(f => f.id === user.farmId)?.name || `Farm ${user.farmId}`}
+                    </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm">
-                      <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        disabled={deletingUserId === user.id}
-                        className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {deletingUserId === user.id ? "Deleting..." : "Delete"}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEditFarm(user)}
+                          className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                        >
+                          Edit Farm
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          disabled={deletingUserId === user.id}
+                          className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {deletingUserId === user.id ? "Deleting..." : "Delete"}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -182,6 +241,53 @@ export default function UsersPage() {
           </table>
         </div>
       </div>
+
+      {/* Edit Farm Modal */}
+      {editingUserId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-slate-900">Edit User Farm</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              User: <span className="font-semibold">{users.find(u => u.id === editingUserId)?.username}</span>
+            </p>
+            
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-slate-900">Select Farm</label>
+              <select
+                value={editFarmId || ""}
+                onChange={(e) => setEditFarmId(parseInt(e.target.value))}
+                className="mt-2 w-full rounded-lg border border-slate-200 px-4 py-2 text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              >
+                <option value="">Select a farm</option>
+                {farms.map((farm) => (
+                  <option key={farm.id} value={farm.id}>
+                    {farm.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => {
+                  setEditingUserId(null);
+                  setEditFarmId(null);
+                }}
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateFarm}
+                disabled={isUpdating}
+                className="flex-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-70"
+              >
+                {isUpdating ? "Updating..." : "Update Farm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

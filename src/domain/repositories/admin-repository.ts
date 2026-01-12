@@ -12,6 +12,7 @@ export interface AdminRepository {
   
   getUsers(): Promise<UserDto[]>;
   createUser(data: CreateUserRequest): Promise<UserDto>;
+  updateUser(userId: number, data: Partial<{ email: string; farmId: number; role: string }>): Promise<UserDto>;
   deleteUser(userId: number): Promise<void>;
   
   getDevices(): Promise<AdminDeviceDto[]>;

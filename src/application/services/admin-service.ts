@@ -25,6 +25,10 @@ export class AdminService {
     return this.adminRepository.createUser(data);
   }
 
+  async updateUser(userId: number, data: Partial<{ email: string; farmId: number; role: string }>): Promise<UserDto> {
+    return this.adminRepository.updateUser(userId, data);
+  }
+
   async getDevices(): Promise<AdminDeviceDto[]> {
     return this.adminRepository.getDevices();
   }
